@@ -62,7 +62,7 @@ AlTab Blocker는 정확히 **반대 방향**으로 동작합니다:
 
 ### 3. FilterKeySetting과 같은 부류입니다
 
-메이플 유저들이 키 씹힘 방지를 위해 널리 쓰는 [FilterKeySetting](https://github.com/lasiyan/Filter-Key-Setting)은 Windows **접근성 설정(필터 키)** 을 변경하는 프로그램입니다. 게임에 일절 관여하지 않고 **OS 설정만 바꾸기 때문에**, 제어판에서 직접 바꾸는 것과 결과적으로 동일하며 오랫동안 커뮤니티에서 사용되어 왔습니다.
+메이플 유저들이 키 씹힘 방지를 위해 널리 쓰는 [FilterKeySetting](https://github.com/lasiyan/Filter-Key-Setting)은 Windows **접근성 설정(필터 키)** 을 변경하는 프로그램입니다. 공개된 소스코드를 직접 확인해보면, Windows 공식 접근성 API인 `SystemParametersInfo(SPI_SETFILTERKEYS)` 호출로 필터 키 값을 적용합니다 — **제어판에서 직접 바꾸는 것과 동일한 경로**이며, 입력을 생성하는 코드(`SendInput` 등)는 소스 전체에 존재하지 않습니다. 이처럼 게임에 일절 관여하지 않고 **OS 설정만 바꾸는 구조**이기에 오랫동안 커뮤니티에서 사용되어 왔습니다.
 
 AlTab Blocker도 같은 철학입니다:
 
@@ -85,7 +85,7 @@ AlTab Blocker도 같은 철학입니다:
 ## 🔨 직접 빌드하기
 
 ```powershell
-git clone <this-repo>
+git clone https://github.com/HazySound/Altablocker.git
 cd altablocker
 python -m venv venv
 .\venv\Scripts\pip install -r requirements.txt
@@ -98,4 +98,4 @@ python -m venv venv
 
 - 이 프로그램: [MIT License](LICENSE)
 - 폰트: [Pretendard](https://github.com/orioncactus/pretendard) — SIL Open Font License 1.1 (exe에 내장되어 함께 배포됩니다)
-- 앱 아이콘: [Flaticon](https://www.flaticon.com/kr/)의 무료 아이콘 2종을 조합해 제작 — [지름길 아이콘 (Iconify Designs)](https://www.flaticon.com/kr/free-icons/), [반 아이콘 (Anggara)](https://www.flaticon.com/kr/free-icons/)
+- 앱 아이콘: [Flaticon](https://www.flaticon.com/)의 무료 아이콘 2종을 조합해 제작 — [Shortcut icons created by Iconify Designs](https://www.flaticon.com/free-icons/shortcut), [Ban icons created by Anggara](https://www.flaticon.com/free-icons/ban)

@@ -15,3 +15,6 @@ __pycache__/
 # Claude 관련
 .claude/
 CLAUDE.md
+
+# 릴리즈 노트 복붙용 로컬 파일
+release_notes.md
