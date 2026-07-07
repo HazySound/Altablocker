@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""PyInstaller spec — AlTab Blocker 단일 exe 빌드.
+"""PyInstaller spec — Altablocker 단일 exe 빌드.
 
 빌드:
     pyinstaller Altablocker.spec

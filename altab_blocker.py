@@ -1,8 +1,8 @@
-"""AlTab Blocker — 선택한 프로그램 포커스 중 Alt+Tab 창 전환 차단.
+"""Altablocker — 선택한 프로그램 포커스 중 Alt+Tab 창 전환·윈도우 키 차단.
 
-동작 원리: 저수준 키보드 훅(WH_KEYBOARD_LL)으로 "Alt가 눌린 상태의 Tab 키 다운"
-이벤트만 삼켜서 Windows 창 전환을 막는다. 그 외 모든 키 입력은 손대지 않고
-그대로 통과시키며, 입력 주입(SendInput 등)은 일절 하지 않는다.
+동작 원리: 저수준 키보드 훅(WH_KEYBOARD_LL)으로 "Alt가 눌린 상태의 Tab 키 다운"과
+(옵션) "윈도우 키 다운" 이벤트만 삼켜서 창 전환·시작 메뉴를 막는다. 그 외 모든 키
+입력은 손대지 않고 그대로 통과시키며, 입력 주입(SendInput 등)은 일절 하지 않는다.
 """
 
 import ctypes
@@ -242,7 +242,7 @@ class KeyboardHook:
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("AlTab Blocker")
+        self.title("Altablocker")
         self.geometry("390x430")
         self.resizable(False, False)
         self._apply_window_icon()

@@ -1,4 +1,4 @@
-# AlTab Blocker
+# Altablocker
 
 > 메이플스토리에서 **Alt(점프) + Tab(기믹 키)** 이 겹쳐 창이 전환되는 사고를 막아주는 유틸리티
 
@@ -55,7 +55,7 @@ Windows가 공식 문서로 제공하는 **저수준 키보드 훅(`WH_KEYBOARD_
 
 커뮤니티에 보고된 정지 사례의 대표격인 **AutoHotkey(오토핫키)** 는 `Send` 명령으로 **키 입력을 생성**하는 자동화 도구입니다. 키 연타, 스킬 시퀀스 자동 입력 등 "사람 대신 입력을 만들어내는" 사용이 가능하기에 제재 대상이 됩니다.
 
-AlTab Blocker는 정확히 **반대 방향**으로 동작합니다:
+Altablocker는 정확히 **반대 방향**으로 동작합니다:
 
 - 입력을 **1개도 생성하지 않습니다.** 물리적으로 누른 키를 통과시키거나(그 외 전부), 무시하거나(Alt 눌린 상태의 Tab, 윈도우 키) — 할 수 있는 일이 이 둘뿐입니다
 - 게임 입장에서는 아무 일도 일어나지 않습니다. 게임이 받는 모든 입력은 **사람이 실제로 누른 키**뿐입니다
@@ -65,9 +65,9 @@ AlTab Blocker는 정확히 **반대 방향**으로 동작합니다:
 
 메이플 유저들이 키 씹힘 방지를 위해 널리 쓰는 [FilterKeySetting](https://github.com/lasiyan/Filter-Key-Setting)은 Windows **접근성 설정(필터 키)** 을 변경하는 프로그램입니다. 공개된 소스코드를 직접 확인해보면, Windows 공식 접근성 API인 `SystemParametersInfo(SPI_SETFILTERKEYS)` 호출로 필터 키 값을 적용합니다 — **제어판에서 직접 바꾸는 것과 동일한 경로**이며, 입력을 생성하는 코드(`SendInput` 등)는 소스 전체에 존재하지 않습니다. 이처럼 게임에 일절 관여하지 않고 **OS 설정만 바꾸는 구조**이기에 오랫동안 커뮤니티에서 사용되어 왔습니다.
 
-AlTab Blocker도 같은 철학입니다:
+Altablocker도 같은 철학입니다:
 
-| | FilterKeySetting | AlTab Blocker |
+| | FilterKeySetting | Altablocker |
 |---|---|---|
 | 건드리는 대상 | Windows 접근성 설정 (레지스트리/`SystemParametersInfo`) | Windows 키 이벤트 전달 (저수준 훅) |
 | 게임 프로세스 접촉 | ❌ 없음 | ❌ 없음 |
