@@ -1,0 +1,4 @@
+customtkinter
+psutil
+pillow
+pyinstaller  # 빌드용: pyinstaller Altablocker.spec
