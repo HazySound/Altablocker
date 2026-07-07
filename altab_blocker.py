@@ -23,6 +23,8 @@ WM_KEYDOWN = 0x0100
 WM_SYSKEYDOWN = 0x0104
 WM_QUIT = 0x0012
 VK_TAB = 0x09
+VK_LWIN = 0x5B
+VK_RWIN = 0x5C
 LLKHF_ALTDOWN = 0x20
 
 ULONG_PTR = ctypes.c_size_t
@@ -181,8 +183,8 @@ class Tooltip:
 
 
 class KeyboardHook:
-    """차단 전용 저수준 키보드 훅. should_block()이 True를 반환하는 순간의
-    Alt+Tab(Tab 다운)만 삼키고, 나머지는 전부 다음 훅으로 통과."""
+    """차단 전용 저수준 키보드 훅. should_block(kind)가 True를 반환하는 순간의
+    Alt+Tab(Tab 다운)/윈도우 키 다운만 삼키고, 나머지는 전부 다음 훅으로 통과."""
 
     def __init__(self, should_block, on_block):
         self._should_block = should_block
@@ -196,9 +198,14 @@ class KeyboardHook:
     def _callback(self, n_code, w_param, l_param):
         if n_code == 0 and w_param in (WM_KEYDOWN, WM_SYSKEYDOWN):
             kb = ctypes.cast(l_param, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
-            if kb.vkCode == VK_TAB and kb.flags & LLKHF_ALTDOWN and self._should_block():
-                self._on_block()
-                return 1  # 이 Tab 다운만 삼킴 → 창 전환 차단
+            kind = None
+            if kb.vkCode == VK_TAB and kb.flags & LLKHF_ALTDOWN:
+                kind = "alttab"
+            elif kb.vkCode in (VK_LWIN, VK_RWIN):
+                kind = "win"
+            if kind and self._should_block(kind):
+                self._on_block(kind)
+                return 1  # 해당 키 다운만 삼킴 → 창 전환/시작 메뉴 차단
         return user32.CallNextHookEx(None, n_code, w_param, l_param)
 
     def _run(self):
@@ -236,21 +243,32 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("AlTab Blocker")
-        self.geometry("390x380")
+        self.geometry("390x430")
         self.resizable(False, False)
         self._apply_window_icon()
 
-        self.blocked_count = 0
+        self.blocked_counts = {"alttab": 0, "win": 0}
         self.hook = KeyboardHook(self._should_block, self._on_block)
 
         pad = {"padx": 16, "pady": (12, 0)}
         base_font = ctk.CTkFont(size=16)
 
         self.switch = ctk.CTkSwitch(
-            self, text="Alt+Tab 차단", font=ctk.CTkFont(size=19, weight="bold"),
+            self, text="차단 활성화", font=ctk.CTkFont(size=19, weight="bold"),
             command=self._on_toggle,
         )
         self.switch.pack(anchor="w", **pad)
+
+        key_row = ctk.CTkFrame(self, fg_color="transparent")
+        key_row.pack(fill="x", **pad)
+        self.chk_alttab = ctk.CTkCheckBox(key_row, text="Alt+Tab", font=base_font,
+                                          command=self._update_status)
+        self.chk_alttab.select()
+        self.chk_alttab.pack(side="left")
+        self.chk_win = ctk.CTkCheckBox(key_row, text="윈도우 키", font=base_font,
+                                       command=self._update_status)
+        self.chk_win.select()
+        self.chk_win.pack(side="left", padx=(16, 0))
 
         self.mode = ctk.CTkSegmentedButton(
             self, values=["선택 프로그램에서만", "전역 차단"], font=base_font,
@@ -273,7 +291,7 @@ class App(ctk.CTk):
                                    font=base_font)
         self.status.pack(anchor="w", **pad)
 
-        self.counter = ctk.CTkLabel(self, text="차단된 Alt+Tab: 0회", text_color="gray",
+        self.counter = ctk.CTkLabel(self, text="차단 — Alt+Tab: 0회 · Win: 0회", text_color="gray",
                                     font=ctk.CTkFont(size=14))
         self.counter.pack(anchor="w", padx=16, pady=(4, 0))
 
@@ -333,14 +351,17 @@ class App(ctk.CTk):
             return False
 
     # ── 훅 콜백 (훅 스레드에서 호출됨) ──────────────────────────────
-    def _should_block(self) -> bool:
+    def _should_block(self, kind: str) -> bool:
+        chk = self.chk_alttab if kind == "alttab" else self.chk_win
+        if not chk.get():
+            return False
         if self.mode.get() == "전역 차단":
             return True
         target = self.process_box.get().strip()
         return bool(target) and foreground_process_name().lower() == target.lower()
 
-    def _on_block(self):
-        self.blocked_count += 1
+    def _on_block(self, kind: str):
+        self.blocked_counts[kind] += 1
 
     # ── GUI ────────────────────────────────────────────────────────
     def _on_toggle(self):
@@ -363,16 +384,22 @@ class App(ctk.CTk):
         self._update_status()
 
     def _update_status(self):
+        keys = [name for chk, name in ((self.chk_alttab, "Alt+Tab"), (self.chk_win, "윈도우 키"))
+                if chk.get()]
+        keys_text = ", ".join(keys)
         if not self.switch.get():
-            self.status.configure(text="⏸ 꺼짐 — Alt+Tab 정상 작동")
+            self.status.configure(text="⏸ 꺼짐 — 모든 키 정상 작동")
+        elif not keys:
+            self.status.configure(text="⚠ 차단할 키가 선택되지 않음")
         elif self.mode.get() == "전역 차단":
-            self.status.configure(text="🛡 전역 차단 중 — 모든 창에서 Alt+Tab 무시")
+            self.status.configure(text=f"🛡 전역 차단 중 — 모든 창에서 {keys_text} 무시")
         else:
             target = self.process_box.get().strip() or "(프로세스 미선택)"
-            self.status.configure(text=f"🛡 {target} 포커스 중에만 Alt+Tab 무시")
+            self.status.configure(text=f"🛡 {target} 포커스 중에만 {keys_text} 무시")
 
     def _poll(self):
-        self.counter.configure(text=f"차단된 Alt+Tab: {self.blocked_count}회")
+        c = self.blocked_counts
+        self.counter.configure(text=f"차단 — Alt+Tab: {c['alttab']}회 · Win: {c['win']}회")
         self.after(500, self._poll)
 
     def _on_close(self):
